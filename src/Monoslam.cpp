@@ -5,6 +5,13 @@
 #include "MotionModel.h"
 #include "DataAssociator.h"
 #include <time.h>  
+#define fopen_s(fp, fmt, mode)    *(fp)=fopen( (fmt), (mode))
+typedef unsigned long long _ULonglong;
+
+namespace cv
+{
+    using std::vector;
+}
 
 MonoSLAM::MonoSLAM():min_number_of_features_in_image(85)
 {
@@ -250,7 +257,7 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
     }
   }
         cv::Mat frame_color;
-        cv::cvtColor(frame_next.data, frame_color, CV_GRAY2RGB);
+        cv::cvtColor(frame_next.data, frame_color, cv::COLOR_GRAY2RGB);
         // draw keyPoints on the image
         for (auto it = Unpredicted.begin(), itEnd = Unpredicted.end(); it != itEnd; it ++)
         {
@@ -276,9 +283,13 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
         //ImPre = frame_next.data.clone();
         /*cv::drawKeypoints(frame_next.data, P_pre, ImPre, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DEFAULT);
         cv::drawKeypoints(ImPre, P_npre, ImNPre, cv::Scalar(255, 255, 0), cv::DrawMatchesFlags::DEFAULT);*/
-        cv::drawKeypoints(frame_color, P_Meas, ImPre, cv::Scalar(0, 0, 255), 4);
+        /*cv::drawKeypoints(frame_color, P_Meas, ImPre, cv::Scalar(0, 0, 255), 4);
         cv::drawKeypoints(ImPre, P_pre, ImNPre, cv::Scalar(0, 255, 0), 4);
-        cv::drawKeypoints(ImNPre, P_npre, Imfinal, cv::Scalar(255, 0, 0), 4);
+        cv::drawKeypoints(ImNPre, P_npre, Imfinal, cv::Scalar(255, 0, 0), 4);*/  //BY haiyu
+
+        cv::drawKeypoints(frame_color, P_Meas, ImPre, cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DEFAULT);
+        cv::drawKeypoints(ImPre, P_pre, ImNPre, cv::Scalar(0, 255, 0), cv::DrawMatchesFlags::DEFAULT);
+        cv::drawKeypoints(ImNPre, P_npre, Imfinal, cv::Scalar(255, 0, 0), cv::DrawMatchesFlags::DEFAULT);
         for (auto it = ind_feats.begin(), itEnd = ind_feats.end(); it != itEnd; it ++)
         {
           if (!(*it).predicted)
@@ -330,7 +341,8 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
         }
         fclose(ProjectionError);
         delete[] errorname;
-        cv::drawKeypoints(Imerror, error, Imerror, cv::Scalar(0, 0, 100), 4);
+        //cv::drawKeypoints(Imerror, error, Imerror, cv::Scalar(0, 0, 100), 4);
+	cv::drawKeypoints(Imerror, error, Imerror, cv::Scalar(0, 0, 100), cv::DrawMatchesFlags::DEFAULT);
         cv::imshow("error", Imerror);
         static char s[30];
         sprintf(s, "error/error%d.jpg", step);

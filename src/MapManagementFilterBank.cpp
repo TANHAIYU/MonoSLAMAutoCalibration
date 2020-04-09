@@ -449,12 +449,13 @@ void MapManagement::initialize_a_feature_other_filter_bank(int step, Frame frame
     //  hori_boundaries(index_row_min[index_col_min] + 1) - hori_boundaries(index_row_min[index_col_min]) + 1, 
     //  verti_boundaries(index_col_min + 1) - verti_boundaries(index_col_min) + 1));
 
-    //-----------------------------------------  OpenCV_FAST DETECTOR ------------------------------------ //
+    //-----------------------------------------  OpenCV_ DETECTOR ------------------------------------ //
     std::vector<cv::KeyPoint> keyPoints;
     //cv::FASTX(im_block, keyPoints, 50, true, 2);
-    cv::FastFeatureDetector fast(60); // define detector threshold, TYPE_5_8 = 0, TYPE_7_12 = 1, TYPE_9_16 = 2(default)
+    // cv::FastFeatureDetector fast(60); // define detector threshold, TYPE_5_8 = 0, TYPE_7_12 = 1, TYPE_9_16 = 2(default)  delelte by Haiyu
+    cv::Ptr<cv::FeatureDetector> fast = cv::FastFeatureDetector::create(60); 
     // feature point detection
-    fast.detect(im_block, keyPoints);
+    fast -> detect(im_block, keyPoints);
     //drawKeypoints(frame.data, keyPoints, frame.data, cv::Scalar::all(255), cv::DrawMatchesFlags::DRAW_OVER_OUTIMG);
     //imshow("FAST feature", frame.data);
     //-----------------------------------------  OpenCV_FAST DETECTOR ------------------------------------ //

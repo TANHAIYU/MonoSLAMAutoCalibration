@@ -6,6 +6,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <vector>
 #include <iomanip>
+#include<stdio.h>
+
+#define fopen_s(fp, fmt, mode)          *(fp)=fopen( (fmt), (mode))
 
 using namespace cv;
 
@@ -29,7 +32,8 @@ int main(int argc, char* argv[])
 	// Read image manually
 	char s[200]; // Here s size is limited
 	//sprintf(s, "images/rawoutput%04d.pgm", step_);
-  sprintf_s(s, 200, "exp_scopis_im_2_720x576/step%d.jpg", step_);
+  //sprintf_s(s, 200, "exp_scopis_im_2_720x576/step%d.jpg", step_); by haiyu
+        snprintf(s, 200, "exp_scopis_im_2_720x576/step%d.jpg", step_);
   //sprintf_s(s, 200, "images2/seqtest%04d.ppm", step_);
 	frame_last.data = imread(s, 0);
 
@@ -48,7 +52,8 @@ int main(int argc, char* argv[])
  //
 
   
-	sprintf_s(s, 200, "exp_scopis_im_2_720x576/step%d.jpg", step_ + 1);
+	//sprintf_s(s, 200, "exp_scopis_im_2_720x576/step%d.jpg", step_ + 1);
+	snprintf(s, 200, "exp_scopis_im_2_720x576/step%d.jpg", step_ + 1);
   //sprintf_s(s, 200, "images2/seqtest%04d.ppm", step_ + 1);
 	frame_next.data = imread(s, 0);
 
@@ -87,7 +92,8 @@ int main(int argc, char* argv[])
 		//frame_last.data = frame_next.data;
 		//mono_slam->frame_grabber_->GetFrame(step + 1, &frame_next);
 		// ------------------------------------------------------------------
-		sprintf_s(s, 200, "exp_scopis_im_2_720x576/step%d.jpg", step + 2);
+		//sprintf_s(s, 200, "exp_scopis_im_2_720x576/step%d.jpg", step + 2); by haiyu
+		snprintf(s, 200, "exp_scopis_im_2_720x576/step%d.jpg", step + 2);
     //sprintf_s(s, 200, "images2/seqtest%04d.ppm", step + 2);
 		frame_next.data = imread(s, 0);
 
