@@ -1,4 +1,4 @@
 MonoSLAMAutoCalibration
 =======================
 
-MonoSLAM to auto calibrate endoscope cameras
+MonoSLAM to auto calibrate  camera
