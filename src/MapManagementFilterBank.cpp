@@ -242,7 +242,7 @@ void MapManagement::map_management_filter_bank(int step, Frame frame, MonoSLAM *
 }
 
 void MapManagement::find_matched_measurements(int *num_of_matched, MatrixXd measurements)
-{   
+{
   // Finds the number of matched feature points
   for (int i = 0; i < measurements.rows(); ++i)
   {
@@ -323,7 +323,7 @@ void MapManagement::initialize_a_feature_other_filter_bank(int step, Frame frame
   MatrixXi initialized;
   // uv_pred is the form * *
   //                     * *
-  //	    			         * *
+  //	    			 * *
   Matrix <double, Dynamic, 2>	&uv_pred = mono_slam->predicted_measurements;
   Matrix <double, Dynamic, 2> NewkeyPoints;
   if (!imsize_determined)
@@ -436,37 +436,25 @@ void MapManagement::initialize_a_feature_other_filter_bank(int step, Frame frame
       (int)(verti_boundaries(index_col_min)), 
       hori_boundaries(index_row_min[index_col_min] + 1) - hori_boundaries(index_row_min[index_col_min]) + 1, 
       verti_boundaries(index_col_min + 1) - verti_boundaries(index_col_min) + 1);
-    frame.data(rect).copyTo(im_block);
-
-    //imshow("sd", im_block);
-    //cv::waitKey(0);
-
-    //cv::Mat im_block = frame.data.rowRange(verti_boundaries(index_col_min) - 1, verti_boundaries(index_col_min + 1)).
-    //	colRange(hori_boundaries(index_row_min[index_col_min]) - 1, hori_boundaries(index_row_min[index_col_min] + 1));
-
-    //cv::Mat im_block = frame.data(cv::Rect((int)(hori_boundaries(index_row_min[index_col_min])), 
-    //  (int)(verti_boundaries(index_col_min)), 
-    //  hori_boundaries(index_row_min[index_col_min] + 1) - hori_boundaries(index_row_min[index_col_min]) + 1, 
-    //  verti_boundaries(index_col_min + 1) - verti_boundaries(index_col_min) + 1));
+    //frame.data(rect).copyTo(im_block);
+    frame.data.copyTo(im_block);
 
     //-----------------------------------------  OpenCV_ DETECTOR ------------------------------------ //
     std::vector<cv::KeyPoint> keyPoints;
-    //cv::FASTX(im_block, keyPoints, 50, true, 2);
-    // cv::FastFeatureDetector fast(60); // define detector threshold, TYPE_5_8 = 0, TYPE_7_12 = 1, TYPE_9_16 = 2(default)  delelte by Haiyu
-    cv::Ptr<cv::FeatureDetector> fast = cv::FastFeatureDetector::create(60); 
+    //cv::Ptr<cv::FeatureDetector> fast = cv::FastFeatureDetector::create(70);
+    cv::Ptr<cv::ORB> orb = cv::ORB::create(300,1.2f,8,31,
+            0,2,cv::ORB::HARRIS_SCORE,31,80);
     // feature point detection
-    fast -> detect(im_block, keyPoints);
-    //drawKeypoints(frame.data, keyPoints, frame.data, cv::Scalar::all(255), cv::DrawMatchesFlags::DRAW_OVER_OUTIMG);
-    //imshow("FAST feature", frame.data);
+    //fast -> detect(im_block, keyPoints);
+    //cv::imshow("im_block",im_block);
+    //cv::waitKey(0);
+
+    orb -> detect(im_block,keyPoints);
+    drawKeypoints(frame.data, keyPoints, frame.data, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+    //cv::imshow("detected features: ",frame.data);
+    //cv::waitKey(0);
     //-----------------------------------------  OpenCV_FAST DETECTOR ------------------------------------ //
 
-
-    //// draw keyPoints on the image
-    //cv::Mat featureIm;
-    //cv::drawKeypoints(im_block, keyPoints, featureIm, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-    //imshow("feature image ", featureIm);
-    //cv::waitKey(0);
-    //////
 
     num_keyPoints = keyPoints.size();
     if (num_keyPoints == 0)
@@ -525,16 +513,15 @@ void MapManagement::initialize_a_feature_other_filter_bank(int step, Frame frame
 
       else
       {
-        // For the consideration of endoscopic image, we should eliminate the features, which are not
-        // located in the circle. $$$$$$$$
+        // For the consideration of endoscopic image, we should eliminate the features, which are not located in the circle. $$$$$$$$
         for (i = 0; i < num_far_feat; ++i)
         {
           int x = keyPoints.at(index_far_feat[i]).pt.x;
           int y = keyPoints.at(index_far_feat[i]).pt.y;
-          //int cx = mono_slam->Cam->nCols_/2;
-          int cx = 352;
-          //int cy = mono_slam->Cam->nRows_/2;
-          int cy = 255;
+          int cx = mono_slam->Cam->nCols_/2;
+          //int cx = 352;
+          int cy = mono_slam->Cam->nRows_/2;
+          //int cy = 255;
           //int radius = 330;
           int radius = 350;
           if (sqrt((double)((x-cx) * (x-cx) + (y-cy) * (y-cy))) > radius - 10)
@@ -551,8 +538,6 @@ void MapManagement::initialize_a_feature_other_filter_bank(int step, Frame frame
           initialized(index_col_min, index_row_min[index_col_min]) = 100;
         else 
         {
-
-          //
           detected_new = true;
         // Choose a random feature
         rand_index = rand() % num_far_feat;

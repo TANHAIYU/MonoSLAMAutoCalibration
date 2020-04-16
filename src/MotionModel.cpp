@@ -18,8 +18,6 @@ void MotionModel::predict_state_and_covariance(VectorXd x_k_k, MatrixXd p_k_k, s
 	double std_alpha, VectorXd *X_km1_k, MatrixXd *P_km1_k)
 {
 	size_t x_k_size = x_k_k.size(), p_k_size = p_k_k.rows();
-	//cout<<"new stand vector 's size is: "<<x_k_size<<endl;
-	//std::cout << "p_k_size in predict_state_and_convarance: " <<p_k_size<<std::endl;
 	double delta_t = 1, linear_acceleration_noise_covariance, angular_acceleration_noise_covariance;
 	VectorXd Xv_km1_k(18), Pn_diag(6);
 	MatrixXd F = MatrixXd::Identity(18,18), // The camera state size is assumed to be 18
@@ -120,7 +118,7 @@ VectorXd MotionModel::tr2rpy(MatrixXd m)
 		double sp, cp;
 		sp = sin(atan2(m(1,0), m(0,0)));
 		cp = cos(atan2(m(1,0), m(0,0)));
-		rpy << atan2(m(1,0), m(0,0)), atan2(-m(2,0), cp * m(0,0) + sp * m(1,0)), 
+		rpy << atan2(m(1,0), m(0,0)), atan2(-m(2,0), cp * m(0,0) + sp * m(1,0)),
 			atan2(sp * m(0,2) - cp * m(1,2), cp * m(1,1) - sp * m(0,1));
 	}
 	return rpy;
@@ -134,16 +132,15 @@ void MotionModel::dq_by_deuler(VectorXd euler_angles, MatrixXd *G)
 	psi = euler_angles(2);
 
 	(*G).block(3,3,4,3) << (0.5)*(-sin(phi/2)+cos(phi/2)), (0.5)*(-sin(theta/2)+cos(theta/2)), (0.5)*(-sin(psi/2)+cos(psi/2)),
-		(0.5)*(+cos(phi/2)+sin(phi/2)), (0.5)*(-sin(theta/2)-cos(theta/2)), (0.5)*(-sin(psi/2)-cos(psi/2)), 
-		(0.5)*(-sin(phi/2)+cos(phi/2)), (0.5)*(+cos(theta/2)-sin(theta/2)), (0.5)*(-sin(psi/2)+cos(psi/2)), 
+		(0.5)*(+cos(phi/2)+sin(phi/2)), (0.5)*(-sin(theta/2)-cos(theta/2)), (0.5)*(-sin(psi/2)-cos(psi/2)),
+		(0.5)*(-sin(phi/2)+cos(phi/2)), (0.5)*(+cos(theta/2)-sin(theta/2)), (0.5)*(-sin(psi/2)+cos(psi/2)),
 		(0.5)*(-sin(phi/2)-cos(phi/2)), (0.5)*(-sin(theta/2)-cos(theta/2)), (0.5)*(+cos(psi/2)+sin(psi/2));
 }
 
 void MotionModel::fv(VectorXd x_k_k, double delta_t, string type, double std_a, double std_alpha, VectorXd *Xv_km1_k)
 {
 	// This function updates the state for the camera. See Javier Civera book P39. 3.2.1 or P129 A.9
-	// It assumes the camera has a constant linear and angular velocity, so the 
-	// linear and angular accelerations are zero.
+	// It assumes the camera has a constant linear and angular velocity, so the linear and angular accelerations are zero.
 
 	VectorXd calibration, rW, qWR, vW, wW, Q, QP; // The camera state size is assumed to be 18
 	calibration = x_k_k.head(5); // Five intrinsic parameters are assumed
@@ -158,29 +155,11 @@ void MotionModel::fv(VectorXd x_k_k, double delta_t, string type, double std_a, 
 		QP = Qprod(qWR, Q); // Cross product of qWR and q((wW+OmegaW)*delta_t), where OmegaW is set to 0
 		*Xv_km1_k << calibration, rW + vW * delta_t, QP, vW, wW; // State update for the camera
 	}
-
-	// The types below are probably not used
-	else if (type.compare("constant_orientation") == 0)
-	{
-
-	}
-	else if (type.compare("constant_position") == 0)
-	{
-
-	}
-	else if (type.compare("constant_position_and_orientation") == 0)
-	{
-
-	}
-	else if (type.compare("constant_position_and_orientation_location_noise") == 0)
-	{
-
-	}
 }
 
 VectorXd MotionModel::V2Q(VectorXd V)
 {
-	// Converts from rotation vector to quaternion representation
+	// Converts from rotation vector to quaternion representation 将旋转矩阵转换到四元数表示形式
 	// Javier Civera book P130. A.15
 	size_t V_size;
 	double norm = 0, v_norm = 0;
@@ -244,32 +223,11 @@ void MotionModel::dfv_by_dxv(VectorXd x_k_k, double delta_t, string type, Matrix
 		(*dfv_by_dxvRES).block(5,12,3,3) = MatrixXd::Identity(3,3) * delta_t; // Delta_t * Identity
 		(*dfv_by_dxvRES).block(8,15,4,3) = dq3_by_dq1(qOld) * dqomegadt_by_domega(omegaOld, delta_t); // dq_k+1^WC/dw_k^C chain rule
 	}
-	/*
-	else if (type.compare("constant_orientation") == 0)
-	{
-	dfv_by_dxvRES.block(8,15,4,3) = MatrixXd::Zero(4,3);
-	dfv_by_dxvRES.block(15,15,3,3) = MatrixXd::Zero(3,3);
-	}
-
-	else if (type.compare("constant_position") == 0)
-	{
-	dfv_by_dxvRES.block(5,12,3,3) = MatrixXd::Zero(3,3);
-	dfv_by_dxvRES.block(12,12,3,3) = MatrixXd::Zero(3,3);
-	}
-
-	else if (type.compare("constant_position_and_orientation") == 0)
-	{
-	dfv_by_dxvRES.block(8,15,4,3) = MatrixXd::Zero(4,3);
-	dfv_by_dxvRES.block(5,12,3,3) = MatrixXd::Zero(3,3);
-	dfv_by_dxvRES.block(15,15,3,3) = MatrixXd::Zero(3,3);
-	dfv_by_dxvRES.block(12,12,3,3) = MatrixXd::Zero(3,3);
-	}
-	*/
 }
 
 MatrixXd MotionModel::dq3_by_dq2(VectorXd q1_in)
 {
-	// This function calculates q_k+1^WC/q_k^WC
+	//// This function calculates q_k+1^WC/q_k^WC
 	// q1_in = q((w_k^C + omega^C) * delta_t) Javier Civera book P130. A.12
 	// q = (q0, q1, q2, q3);
 	// output: ( q0 -q1 -q2 -q3
@@ -292,7 +250,7 @@ MatrixXd MotionModel::dq3_by_dq2(VectorXd q1_in)
 
 MatrixXd MotionModel::dq3_by_dq1(VectorXd q2_in)
 {
-	// This function calculates dq_k+1^WC/dq((w_k^C + omega^C) * delta_t) which is also 
+	// This function calculates dq_k+1^WC/dq((w_k^C + omega^C) * delta_t) which is also
 	// represented by dq3/dq1, see Javier Civera book P132. A.14
 	// output: ( q0 -q1 -q2 -q3
 	//			 q1  q0 -q3  q2
@@ -327,7 +285,7 @@ MatrixXd MotionModel::dqomegadt_by_domega(VectorXd omega, double delta_t)
 	// Use generic ancillary functions to calculate components of Jacobian
 	dqomegadt_by_domegaRES << dq0_by_domegaA(omega(0), omega_norm, delta_t), dq0_by_domegaA(omega(1), omega_norm, delta_t), dq0_by_domegaA(omega(2), omega_norm, delta_t),
 		dqA_by_domegaA(omega(0), omega_norm, delta_t), dqA_by_domegaB(omega(0), omega(1), omega_norm, delta_t), dqA_by_domegaB(omega(0), omega(2), omega_norm, delta_t),
-		dqA_by_domegaB(omega(1), omega(0), omega_norm, delta_t), dqA_by_domegaA(omega(1), omega_norm, delta_t), dqA_by_domegaB(omega(1), omega(2), omega_norm, delta_t), 
+		dqA_by_domegaB(omega(1), omega(0), omega_norm, delta_t), dqA_by_domegaA(omega(1), omega_norm, delta_t), dqA_by_domegaB(omega(1), omega(2), omega_norm, delta_t),
 		dqA_by_domegaB(omega(2), omega(0), omega_norm, delta_t), dqA_by_domegaB(omega(2), omega(1), omega_norm, delta_t), dqA_by_domegaA(omega(2), omega_norm, delta_t);
 	return dqomegadt_by_domegaRES;
 }
@@ -339,7 +297,7 @@ double MotionModel::dq0_by_domegaA(double omegaA, double omega_norm, double delt
 
 double MotionModel::dqA_by_domegaA(double omegaA, double omega_norm, double delta_t)
 {
-	return (delta_t / 2.0) * omegaA * omegaA / (omega_norm * omega_norm) * cos(omega_norm * delta_t / 2.0) 
+	return (delta_t / 2.0) * omegaA * omegaA / (omega_norm * omega_norm) * cos(omega_norm * delta_t / 2.0)
 		+ (1.0 / omega_norm) * (1.0 - omegaA * omegaA / (omega_norm * omega_norm)) * sin(omega_norm * delta_t / 2.0);
 }
 

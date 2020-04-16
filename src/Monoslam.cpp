@@ -52,6 +52,8 @@ MonoSLAM::~MonoSLAM()
   while (!features_info.empty())
     features_info.pop_back();
 }
+
+
 void MonoSLAM::Init(const string &config_path, double* dx, double* dy,
 	int* nRows, int* nCols, string* model, int init_frame_id, int init_max)
 {
@@ -72,7 +74,7 @@ void MonoSLAM::Init_filterbank(FilterBank *KalmanFilterBank_)
 	x_k_k_output = KalmanFilterBank_->x_k_k;
 	p_k_k_output = KalmanFilterBank_->p_k_k;
 	KalmanFilterBank_->initialize_filterbank();
-	mu = VectorXd::Ones(KalmanFilterBank_->filter_size) / KalmanFilterBank_->filter_size;  //TODO::BY haiyu
+	mu = VectorXd::Ones(KalmanFilterBank_->filter_size) / KalmanFilterBank_->filter_size;
 }
 
 void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_last, Frame frame_next)
@@ -81,33 +83,36 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
 	VectorXd nu;
 	MatrixXd mu_data, S;
 	size_t num_filters;
-  double start1 = clock();
+    double start1 = clock();
 	MapManager->map_management_filter_bank(step, frame_last, this);
-  double end1 = clock();
-  // If there is no feature in the map after processing the image, jump out 需要保证处理的图片中要有特征点，不然直接跳出
-  if (this->features_info.size() == 0)
-  {
-    return;
-  }
+    double end1 = clock();
+    // If there is no feature in the map after processing the image, jump out 需要保证处理的图片中要有特征点，不然直接跳出
+    if (this->features_info.size() == 0)
+    {
+        return;
+    }
 
-  double start2 = clock();
-  //用EKF预测
-  Kalman_->EKF_Prediction(this);
-  double end2 = clock();
-  double start3 = clock();
-  DataAssociator_->FilterBankMatching(this, this->mu, frame_next);
-  double end3 = clock();
-  double start4 = clock();
-  Kalman_->EKF_Update(this,this->KalmanFilterBank_->FilterBank_);
-  double end4 = clock();
+    double start2 = clock();
+    Kalman_->EKF_Prediction(this);
+    double end2 = clock();
+    double start3 = clock();
+    DataAssociator_->FilterBankMatching(this, this->mu, frame_next);
+    double end3 = clock();
+    double start4 = clock();
+    Kalman_->EKF_Update(this,this->KalmanFilterBank_->FilterBank_);
+    double end4 = clock();
+
+    //show time every process used
+    cout << "----------------------------------------"<<endl
+            <<"Time for Map Management Filter Bank: " <<double((end1-start1)) / CLOCKS_PER_SEC << endl
+            <<  "Time for EKF Prediction: " << double((end2-start2)) / CLOCKS_PER_SEC <<endl
+            << "Time for FilterBankMatching: "<< double((end3-start3)) / CLOCKS_PER_SEC <<endl
+            << "Time for EKF update" << double((end4-start4)) / CLOCKS_PER_SEC << "    " << endl
+            <<"----------------------------------------"<<endl;
 
 
-  cout << double((end1-start1)) / CLOCKS_PER_SEC << "    " << double((end2-start2)) / CLOCKS_PER_SEC << "    " 
-    << double((end3-start3)) / CLOCKS_PER_SEC << "    "  << double((end4-start4)) / CLOCKS_PER_SEC << "    " << endl;
 	// Compute a posteriori probability for each filter
-	// num_filters = this->KalmanFilterBank_->filter_size ;
 	num_filters = this->KalmanFilterBank_->filter_size/2 ; //TODO::BY haiyu
-	//cout<<"filter_size after monoslamok5: "<<num_filters<<endl;  //TODO::BY haiyu
 	mu_data = VectorXd::Zero(num_filters);
 
 	for (size_t i = 0; i < num_filters; ++i)
@@ -136,7 +141,7 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
 		this->x_k_k_output += this->KalmanFilterBank_->FilterBank_.at(i)->x_k_k_ * this->mu(i);
 	}
 
-	// Covariance matrix compuatation 计算协方差矩阵
+	// Covariance matrix compuatation
 	for (size_t i = 0; i < num_filters; ++i)
 	{
 		this->p_k_k_output += (this->KalmanFilterBank_->FilterBank_.at(i)->p_k_k_ + 
@@ -178,18 +183,20 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
 			}
 		}
 
+
 		// Assign new mu and likelihood ratio
     this->mu = mu_new;
     this->likelihood_ratio = likelihood_ratio_new;
     this->KalmanFilterBank_->filter_size = num_filters_new*2 ;   //*2 TODO:By haiyu
     cout<<"after pruned filter size: "<<num_filters_new<<endl;
 
-    // Renormalize probabilities 重新归一化概率
+    // Renormalize probabilities
     double sum_of_discrete_probabilities = this->mu.sum();
     this->mu /= sum_of_discrete_probabilities;
   }
-    cout<<"renormalize probabilities done!!!"<<endl;
-  // Display the matched and unmatched feature points 展示配对和未配对的特征点
+
+
+	// Display the matched and unmatched feature points 展示配对和未配对的特征点
   cv::Mat ImPre, ImNPre, Imfinal;
   cv::KeyPoint feature_P, feature_NP, feature_Meas;
   vector<cv::KeyPoint> P_pre, P_npre, P_Meas;
@@ -288,8 +295,6 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
         cv::drawKeypoints(frame_color, P_Meas, ImPre, cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DEFAULT);
         cv::drawKeypoints(ImPre, P_pre, ImNPre, cv::Scalar(0, 255, 0), cv::DrawMatchesFlags::DEFAULT);
         cv::drawKeypoints(ImNPre, P_npre, Imfinal, cv::Scalar(255, 0, 0), cv::DrawMatchesFlags::DEFAULT);
-        cout<<"draw the keypoint on the image done!!!"<<endl;
-
 
         for (auto it = ind_feats.begin(), itEnd = ind_feats.end(); it != itEnd; it ++)
         {

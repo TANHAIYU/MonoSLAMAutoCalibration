@@ -69,9 +69,7 @@ int main()
   {
     return -1;
   }
-  
-  //imshow("iamge", frame_next.data);
-  //cv::waitKey(0);
+
   // ---------------------------------------------------------------------
   //camera parameter initialization
   // Set camera calibration
@@ -146,17 +144,6 @@ int main()
      //namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
      //imshow( "Display window", frame.data.rowRange(100,200).colRange(100,300));
 
-     /*
-     // -----------------------------------------  OpenCV_FAST ALGORITHM ------------------------------------ //
-     std::vector<KeyPoint> keyPoints;
-     //cv::FASTX(frame.data, keyPoints, 50, true, 2);
-       FastFeatureDetector fast(50); // define detector threshold, TYPE_5_8 = 0, TYPE_7_12 = 1, TYPE_9_16 = 2(default)
-     // feature point detection
-     fast.detect(frame.data,keyPoints);
-     drawKeypoints(frame.data, keyPoints, frame.data, Scalar::all(255), DrawMatchesFlags::DRAW_OVER_OUTIMG);
-     imshow("FAST feature", frame.data);
-     // -----------------------------------------  OpenCV_FAST ALGORITHM ------------------------------------ //
-     */
   delete mono_slam;
 	cv::waitKey(0);
   	//cout <<"the size of the kalman filter is "<< KalmanFilterBank -> FilterBank_.size() << endl; //by haiyu
