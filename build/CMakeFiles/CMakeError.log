@@ -1,0 +1,55 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/haiyutan/master-thesis/MonoSLAMAutoCalibration/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_60243/fast"
+/usr/bin/make -f CMakeFiles/cmTC_60243.dir/build.make CMakeFiles/cmTC_60243.dir/build
+make[1]: 进入目录“/home/haiyutan/master-thesis/MonoSLAMAutoCalibration/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_60243.dir/CheckSymbolExists.c.o
+/opt/qtcreator-4.9.2/libexec/qtcreator/clang/bin/clang    -o CMakeFiles/cmTC_60243.dir/CheckSymbolExists.c.o   -c /home/haiyutan/master-thesis/MonoSLAMAutoCalibration/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_60243
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_60243.dir/link.txt --verbose=1
+/opt/qtcreator-4.9.2/libexec/qtcreator/clang/bin/clang      -rdynamic CMakeFiles/cmTC_60243.dir/CheckSymbolExists.c.o  -o cmTC_60243 
+CMakeFiles/cmTC_60243.dir/CheckSymbolExists.c.o：在函数‘main’中：
+CheckSymbolExists.c:(.text+0x19)：对‘pthread_create’未定义的引用
+clang-7: error: linker command failed with exit code 1 (use -v to see invocation)
+CMakeFiles/cmTC_60243.dir/build.make:97: recipe for target 'cmTC_60243' failed
+make[1]: *** [cmTC_60243] Error 1
+make[1]: 离开目录“/home/haiyutan/master-thesis/MonoSLAMAutoCalibration/build/CMakeFiles/CMakeTmp”
+Makefile:126: recipe for target 'cmTC_60243/fast' failed
+make: *** [cmTC_60243/fast] Error 2
+
+File /home/haiyutan/master-thesis/MonoSLAMAutoCalibration/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/haiyutan/master-thesis/MonoSLAMAutoCalibration/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_c9b61/fast"
+/usr/bin/make -f CMakeFiles/cmTC_c9b61.dir/build.make CMakeFiles/cmTC_c9b61.dir/build
+make[1]: 进入目录“/home/haiyutan/master-thesis/MonoSLAMAutoCalibration/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_c9b61.dir/CheckFunctionExists.c.o
+/opt/qtcreator-4.9.2/libexec/qtcreator/clang/bin/clang   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_c9b61.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
+Linking C executable cmTC_c9b61
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c9b61.dir/link.txt --verbose=1
+/opt/qtcreator-4.9.2/libexec/qtcreator/clang/bin/clang  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_c9b61.dir/CheckFunctionExists.c.o  -o cmTC_c9b61 -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+clang-7: error: linker command failed with exit code 1 (use -v to see invocation)
+CMakeFiles/cmTC_c9b61.dir/build.make:97: recipe for target 'cmTC_c9b61' failed
+make[1]: *** [cmTC_c9b61] Error 1
+make[1]: 离开目录“/home/haiyutan/master-thesis/MonoSLAMAutoCalibration/build/CMakeFiles/CMakeTmp”
+Makefile:126: recipe for target 'cmTC_c9b61/fast' failed
+make: *** [cmTC_c9b61/fast] Error 2
+
+

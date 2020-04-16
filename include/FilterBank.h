@@ -30,7 +30,7 @@ public:
 	double k2_deviation;
 	double std_a;
 	double std_alpha;
-    double Cx_0;
+    	double Cx_0;
 	double Cy_0;
 	string type;
 	size_t filter_size;

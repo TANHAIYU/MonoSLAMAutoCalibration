@@ -1,5 +1,5 @@
 #include "MotionModel.h"
-
+#include <iostream>
 
 
 MotionModel::MotionModel()
@@ -18,6 +18,8 @@ void MotionModel::predict_state_and_covariance(VectorXd x_k_k, MatrixXd p_k_k, s
 	double std_alpha, VectorXd *X_km1_k, MatrixXd *P_km1_k)
 {
 	size_t x_k_size = x_k_k.size(), p_k_size = p_k_k.rows();
+	//cout<<"new stand vector 's size is: "<<x_k_size<<endl;
+	//std::cout << "p_k_size in predict_state_and_convarance: " <<p_k_size<<std::endl;
 	double delta_t = 1, linear_acceleration_noise_covariance, angular_acceleration_noise_covariance;
 	VectorXd Xv_km1_k(18), Pn_diag(6);
 	MatrixXd F = MatrixXd::Identity(18,18), // The camera state size is assumed to be 18

@@ -15,14 +15,15 @@ DataAssociator::~DataAssociator()
 
 void DataAssociator::FilterBankMatching(MonoSLAM *mono_slam, VectorXd mu_k_km1, Frame frame)
 {
-  size_t i, j, k;
-  vector<KalmanFilter *> &FilterBank = mono_slam->KalmanFilterBank_->FilterBank_;
-	size_t num_filters = mono_slam->KalmanFilterBank_->filter_size;
+  	size_t i, j, k;
+  	vector<KalmanFilter *> &FilterBank = mono_slam->KalmanFilterBank_->FilterBank_; 
+	size_t num_filters = mono_slam->KalmanFilterBank_->filter_size/2; //TODO::BY haiyu
+	//cout << "filter_size from KalmanFilterBank_: "<< mono_slam->KalmanFilterBank_->filter_size/2 <<endl;                   //BY haiyu
 	size_t num_predicted_measurements = FilterBank.at(0)->num_measurements;
 	MatrixXi predicted_by_all_filters, predicted_by_filter(num_predicted_measurements, 2);
 	MatrixXd predicted, predicted_transpose, S_predicted, predicted_measurement_transpose; // For the fusing EKF filter bank
 	MatrixXd measurements;
-	VectorXd z, h; // Vector form of measurements and predicted measurements
+	VectorXd z, h; // Vector form of measurements and predicted measurements  测量和预测的向量形式
 	VectorXi matched_index;
 	if (num_filters > 1)
 	{
@@ -30,7 +31,7 @@ void DataAssociator::FilterBankMatching(MonoSLAM *mono_slam, VectorXd mu_k_km1, 
 
 		// Find the predicted measurements which are successfully predicted by all of the filters
 		// The result is a binary matrix of size num_predicted_measurements x 2, 0 value means the point is not 
-		// successfully predicted by each of the filters.
+		// successfully predicted by each of the filters.  寻找被所有filter找到的预测的测量值，0表示没有被所有filters预测
 		for (i = 0; i < num_filters; ++i)
 		{
 			// Mark the successfully predicted measurements by 1. Loop over column first because it's column wise stored
@@ -54,9 +55,12 @@ void DataAssociator::FilterBankMatching(MonoSLAM *mono_slam, VectorXd mu_k_km1, 
 		S_predicted = MatrixXd::Zero(FilterBank.at(0)->Rownum_S_predicted, FilterBank.at(0)->Colnum_S_predicted);
 
 		for (i = 0; i < num_filters; ++i)
-		{
+		{	
+			//std::cout<<"FilterBankMatching ok7"<<endl;
 			// Accumulates the predicted for every filter
 			predicted +=  FilterBank.at(i)->predicted_measurements * mu_k_km1(i);
+			//std::cout<<"FilterBankMatching ok8"<<endl;
+			//std::cout<<"Now i is : "<<i <<"/"<< num_filters << endl;                   //BY haiyu
 		}
 
 		// Here we use transpose and map it into a vector for the sake of calculating the S_predicted matrix below
@@ -66,6 +70,7 @@ void DataAssociator::FilterBankMatching(MonoSLAM *mono_slam, VectorXd mu_k_km1, 
 		{
 			// Accumulates S_predicted for every filter
 			predicted_measurement_transpose = FilterBank.at(i)->predicted_measurements.transpose();
+			//std::cout<<"FilterBankMatching ok9"<<endl;
 			// Reshape predicted measurements, first transpose because of the column storage
 			Map<VectorXd> predicted_measure_transpose_vec(predicted_measurement_transpose.data(), 
 				predicted_measurement_transpose.rows() * predicted_measurement_transpose.cols());
@@ -73,6 +78,8 @@ void DataAssociator::FilterBankMatching(MonoSLAM *mono_slam, VectorXd mu_k_km1, 
 				((predicted_transpose_vec - predicted_measure_transpose_vec).transpose());
 			S_predicted += (FilterBank.at(i)->S_predicted_ + (predicted_transpose_vec - predicted_measure_transpose_vec) * 
 				(predicted_transpose_vec - predicted_measure_transpose_vec).transpose()) * mu_k_km1(i);
+			//std::cout<<"FilterBankMatching ok10"<<endl;
+
 		}
 		// Remove the unpredicted measurements by all filters
 		for (k = 0; k < 2; ++k)
@@ -83,20 +90,22 @@ void DataAssociator::FilterBankMatching(MonoSLAM *mono_slam, VectorXd mu_k_km1, 
 					predicted(j,k) = -1;
 			}
 		}
+		//std::cout<<"FilterBankMatching ok11"<<endl;
 	}
 	else
 	{
 		predicted = FilterBank.at(0)->predicted_measurements;
 		S_predicted = FilterBank.at(0)->S_predicted_;
+		//std::cout<<"FilterBankMatching ok12"<<endl;
 	}
-	
+	//cout<< "now frame size: "<<(frame.data).rows << (frame.data).cols << endl;   //BY haiyu
 	Matching(frame, predicted, S_predicted, mono_slam->features_info, mono_slam->Cam, &measurements, &z, &h, &matched_index);
-
+	//std::cout<<"FilterBankMatching ok13"<<endl;
 	//JointCompatibility(predicted, measurements, S_predicted); // not implemented yet
 
 	// fill in the filter banks
 	size_t size_z = z.size(), count;
-	for (i = 0; i < num_filters; ++i)
+	for (i = 0; i < num_filters; ++i) 
 	{
 		FilterBank.at(i)->h_ = h;
 		FilterBank.at(i)->z_ = z;
@@ -111,7 +120,9 @@ void DataAssociator::FilterBankMatching(MonoSLAM *mono_slam, VectorXd mu_k_km1, 
 		}
 		FilterBank.at(i)->S_matching_ = FilterBank.at(i)->H_matching_ * FilterBank.at(i)->p_k_km1_ * FilterBank.at(i)->H_matching_.transpose() + 
 			MatrixXd::Identity(FilterBank.at(i)->H_matching_.rows(), FilterBank.at(i)->H_matching_.rows()) * FilterBank.at(i)->std_z_;
+		//std::cout<<"FilterBankMatching ok14"<<endl;
 	}
+	//std::cout<<"FilterBankMatching ok15"<<endl;
 	mono_slam->measurements = measurements;
 	mono_slam->predicted_measurements = predicted;
   mono_slam->S_predicted_ = S_predicted; // Ellipse region
@@ -121,7 +132,7 @@ void DataAssociator::Matching(Frame frame, MatrixXd predicted_measurements, Matr
 	 VectorXd *measurements_map, VectorXd *predicted_measurements_map, VectorXi *matched_index)
 {
 	double correlation_threshold = 0.85, chi2inv_2_95 = 5.99146; // the value of chi1inv_2_95 is obtained directly from the matlab
-  int i, j, k, jj, kk, l, m;
+  	int i, j, k, jj, kk, l, m;
 	size_t num_features, half_patch_size_when_matching, pixels_in_the_match_patch, index_predicted, num_matched = 0;
 	num_features = predicted_measurements.rows();
 	half_patch_size_when_matching = features_info.at(0).half_patch_size_when_matching;
@@ -129,32 +140,31 @@ void DataAssociator::Matching(Frame frame, MatrixXd predicted_measurements, Matr
 	MatrixXd S, invS;
 	(*measurements).resize(num_features, 2);
 	(*measurements).fill(-1);
-
 	index_predicted = 0;
-
 	for (i = 0; i < (int)num_features; ++i)
-	{
+	{	
 		if (predicted_measurements(i,0) != -1 && predicted_measurements(i,1) != -1)
 		{
 			index_predicted ++;
 			S = S_predicted.block(2 * i, 2 * i, 2, 2);
 			if (sqrt(S.diagonal().maxCoeff()) < 100)
-			{
+			{	
 				invS = S.inverse();
-        cv::Mat predicted_patch;
-        features_info.at(i).patch_when_initialized.copyTo(predicted_patch);
+        			cv::Mat predicted_patch;
+        			features_info.at(i).patch_when_initialized.copyTo(predicted_patch);
 				//cv::Mat predicted_patch = features_info.at(i).patch_when_initialized;
 				size_t half_search_region_size_x = (size_t)ceil(2 * sqrt(S(0,0)));
 				size_t half_search_region_size_y = (size_t)ceil(2 * sqrt(S(1,1)));
-        // make sure the half_search_region is not too large
-        //if (half_search_region_size_x > 15)
-        //{
-        //  half_search_region_size_x = 15;
-        //}
-        //else if (half_search_region_size_y > 15)
-        //{
-        //  half_search_region_size_y = 15;
-        //}
+
+        			// make sure the half_search_region is not too large
+        			if (half_search_region_size_x > 15)
+        			{
+        			  half_search_region_size_x = 15;
+        			}
+        			else if (half_search_region_size_y > 15)
+        			{
+        			  half_search_region_size_y = 15;
+        			}
 
 				//Map<MatrixXf> predicted_patch(((features_info.at(i)).patch_when_initialized).data());
 				MatrixXd patches_for_correlation = MatrixXd::Zero(pixels_in_the_match_patch, (2 * half_search_region_size_x + 1) * (2 * half_search_region_size_y + 1) + 1);
@@ -168,114 +178,132 @@ void DataAssociator::Matching(Frame frame, MatrixXd predicted_measurements, Matr
 						corr_row_index ++;
 					}
 				size_t index_patches_for_correlation = 0;
-        for (jj = (int)(floor(predicted_measurements(i,0) + 0.5) - half_search_region_size_x); jj <  (int)(floor(predicted_measurements(i,0) + 0.5) + half_search_region_size_x + 1); ++jj)
-        {
-          for (kk = (int)(floor(predicted_measurements(i,1) + 0.5) - half_search_region_size_y); kk <  (int)(floor(predicted_measurements(i,1) + 0.5) + half_search_region_size_y + 1); ++kk)
-          {
-            VectorXd nu(2);
-            nu << jj - predicted_measurements(i,0), kk - predicted_measurements(i,1);
-            if ((nu.transpose() * invS * nu) < chi2inv_2_95)
-            {
-              if ((jj > (int)half_patch_size_when_matching) && (jj < cam->nCols_ - (int)half_patch_size_when_matching) &&
-                (kk > (int)half_patch_size_when_matching) && (kk < cam->nRows_ - (int)half_patch_size_when_matching))
-              {
-                // Copy the subimage to image_patch but point to the position of the ROI
-                cv::Mat image_patch;
-                cv::Rect rect(jj - half_patch_size_when_matching, kk - half_patch_size_when_matching, 
-                  2 * half_patch_size_when_matching + 1, 2 * half_patch_size_when_matching + 1);
-                frame.data(rect).copyTo(image_patch);
+        			for (jj = (int)(floor(predicted_measurements(i,0) + 0.5) - half_search_region_size_x); jj <  (int)(floor(predicted_measurements(i,0) + 0.5) + half_search_region_size_x + 1); ++jj)
+        			{
+          				for (kk = (int)(floor(predicted_measurements(i,1) + 0.5) - half_search_region_size_y); kk <  (int)(floor(predicted_measurements(i,1) + 0.5) + half_search_region_size_y + 1); ++kk)
+          				{
+            					VectorXd nu(2);
+            					nu << jj - predicted_measurements(i,0), kk - predicted_measurements(i,1);
+            					if ((nu.transpose() * invS * nu) < chi2inv_2_95)
+            					{
+              						if ((jj > (int)half_patch_size_when_matching) && (jj < cam->nCols_ - (int)half_patch_size_when_matching) &&
+                						(kk > (int)half_patch_size_when_matching) && (kk < cam->nRows_ - (int)half_patch_size_when_matching))
+              						{
+                						// Copy the subimage to image_patch but point to the position of the ROI
+                						cv::Mat image_patch;
+                						cv::Rect rect(jj - half_patch_size_when_matching, kk - half_patch_size_when_matching, 2 * half_patch_size_when_matching + 1,  2 * half_patch_size_when_matching + 1);
+								//cout<<"rect size: "<< jj - half_patch_size_when_matching <<" " << kk - half_patch_size_when_matching << " " 
+								//	<< 2 * half_patch_size_when_matching + 1 <<" "<< 2 * half_patch_size_when_matching + 1 << endl;
+								//cout<<"frame.data size: "<<(frame.data).rows<<" "<<(frame.data).cols<<endl;
+								//cout<< "frame.data size: "<<(frame.data).size<<endl;
+		
+								//std::cout<<"its ok1"<<endl;
+                						image_patch = frame.data(cv::Rect(jj - half_patch_size_when_matching, kk - half_patch_size_when_matching, 
+											2 * half_patch_size_when_matching + 1, 2 * half_patch_size_when_matching + 1));            //By haiyu
+                						//frame.data(rect).copyTo(image_patch);
+								//std::cout << "its ok2! "<<endl;
+                						//image_patch = frame.data.rowRange(kk - half_patch_size_when_matching - 1, kk + half_patch_size_when_matching).
+                						//	colRange(jj - half_patch_size_when_matching - 1, jj + half_patch_size_when_matching);
+                						// rowRange and colRange method is changed to cv:.Rect method
+                						//image_patch = frame.data(cv::Rect(jj - half_patch_size_when_matching, kk - half_patch_size_when_matching, 
+                						//  2 * half_patch_size_when_matching + 1, 2 * half_patch_size_when_matching + 1));
+                						index_patches_for_correlation ++;
+                						image_patch.convertTo(image_patch, CV_64FC1);
+                						corr_row_index = 0;
+                						for (l = 0; l < image_patch.rows; ++l)
+                  							for (m = 0; m < image_patch.cols; ++m)
+                  							{
+                    							 patches_for_correlation(corr_row_index,index_patches_for_correlation) = image_patch.at<double>(l,m);
+                    							 corr_row_index ++;
+                  							}
+                  						match_candidates(0, index_patches_for_correlation - 1) = jj;
+                  						match_candidates(1, index_patches_for_correlation - 1) = kk;
+              						}
+            					}
+          				}
+        			}
+        			// If no match_candidates there will be no measured points
+        			if (index_patches_for_correlation != 0)
+        			{
+          			int r, c;
+          			double maxcorr;
+          			// Calculates the correlation matrix  计算矫正矩阵
+          			MatrixXd patches_for_correlation_block; 
+          			patches_for_correlation_block = patches_for_correlation.block(0,0,pixels_in_the_match_patch,index_patches_for_correlation + 1);
+	  			//std::cout<<"index_patches_for_correlation"<< index_patches_for_correlation<< endl;
+          			VectorXd Mean_correlation;
+          			Mean_correlation = patches_for_correlation_block.colwise().sum() / pixels_in_the_match_patch; // The mean value for different image patches 不同图像patch的平均值
+	  			//std::cout<<"Matching ok12"<<endl;
+          			patches_for_correlation_block.rowwise() -= Mean_correlation.transpose(); // broadcasting, each row subtracts the mean value
+	  			//std::cout<<"Matching ok13"<<endl;
+          			MatrixXd Cov;
+          			Cov = patches_for_correlation_block.transpose() * patches_for_correlation_block / (pixels_in_the_match_patch - 1);
+	  			//std::cout<<"Matching ok14"<<endl;
+          			VectorXd Cov_diagonal;
+          			Cov_diagonal = Cov.diagonal();
+	  			//std::cout<<"Matching ok15"<<endl;
+          			//for (size_t ind = 0; ind <  Cov_diagonal.size(); ++ind)
+          			//	Cov_diagonal(ind) = sqrt(Cov_diagonal(ind));
+          			Cov_diagonal = Cov_diagonal.cwiseSqrt();
+	  			//std::cout<<"Matching ok16"<<endl;
+          			MatrixXd Cov_diagonal_square;
+          			Cov_diagonal_square = Cov_diagonal * Cov_diagonal.transpose();
+	  			//std::cout<<"Matching ok17"<<endl;
+          			//Cov = Cov.array() / Cov_diagonal_square.array();
 
-                //image_patch = frame.data.rowRange(kk - half_patch_size_when_matching - 1, kk + half_patch_size_when_matching).
-                //	colRange(jj - half_patch_size_when_matching - 1, jj + half_patch_size_when_matching);
-                // rowRange and colRange method is changed to cv:.Rect method
-                //image_patch = frame.data(cv::Rect(jj - half_patch_size_when_matching, kk - half_patch_size_when_matching, 
-                //  2 * half_patch_size_when_matching + 1, 2 * half_patch_size_when_matching + 1));
-                index_patches_for_correlation ++;
-                image_patch.convertTo(image_patch, CV_64FC1);
-                corr_row_index = 0;
-                for (l = 0; l < image_patch.rows; ++l)
-                  for (m = 0; m < image_patch.cols; ++m)
-                  {
-                    patches_for_correlation(corr_row_index,index_patches_for_correlation) = image_patch.at<double>(l,m);
-                    corr_row_index ++;
-                  }
-                  match_candidates(0, index_patches_for_correlation - 1) = jj;
-                  match_candidates(1, index_patches_for_correlation - 1) = kk;
-              }
-            }
-          }
-        }
+          			// We can reduce the computational cost further, e.g. just compute the first row value
 
-        // If no match_candidates there will be no measured points
-        if (index_patches_for_correlation != 0)
-        {
-          int r, c;
-          double maxcorr;
+          			Cov = Cov.cwiseQuotient(Cov_diagonal_square); // Coefficient-wise division gets the correlation matrix
 
-          // Calculates the correlation matrix
-          MatrixXd patches_for_correlation_block; 
-          patches_for_correlation_block = patches_for_correlation.block(0,0,pixels_in_the_match_patch,index_patches_for_correlation + 1);
-          VectorXd Mean_correlation;
-          Mean_correlation = patches_for_correlation_block.colwise().sum() / pixels_in_the_match_patch; // The mean value for different image patches
-          patches_for_correlation_block.rowwise() -= Mean_correlation.transpose(); // Eigen broadcasting, each row subtracts the mean value
-          MatrixXd Cov;
-          Cov = patches_for_correlation_block.transpose() * patches_for_correlation_block / (pixels_in_the_match_patch - 1);
-          VectorXd Cov_diagonal;
-          Cov_diagonal = Cov.diagonal();
-          //for (size_t ind = 0; ind <  Cov_diagonal.size(); ++ind)
-          //	Cov_diagonal(ind) = sqrt(Cov_diagonal(ind));
-          Cov_diagonal = Cov_diagonal.cwiseSqrt();
-          MatrixXd Cov_diagonal_square;
-          Cov_diagonal_square = Cov_diagonal * Cov_diagonal.transpose();
-          //Cov = Cov.array() / Cov_diagonal_square.array();
+          			//for (int index = 0; index < Cov.rows(); ++index)
+          			//	Cov(index,index)  = 0;
+          			//cout << Cov.maxCoeff() <<endl << Cov.block(0,1,1,Cov.cols() - 1).maxCoeff() << endl;
+          			//for (size_t index = 0; index < Cov.cols(); ++index)
+          			//{
+          			//	if (_isnan(Cov(0,index)))
+          			//		Cov(0,index) = 0;
+          			//}
+          			maxcorr = Cov.block(0,1,1,Cov.cols() - 1).maxCoeff(&r, &c); // Find the maximum value and row and column index of it
+	  			//std::cout<<"Matching ok18"<<endl;
 
-          // We can reduce the computational cost further, e.g. just compute the first row value
-
-          Cov = Cov.cwiseQuotient(Cov_diagonal_square); // Coefficient-wise division gets the correlation matrix
-
-          //for (int index = 0; index < Cov.rows(); ++index)
-          //	Cov(index,index)  = 0;
-          //cout << Cov.maxCoeff() <<endl << Cov.block(0,1,1,Cov.cols() - 1).maxCoeff() << endl;
-          //for (size_t index = 0; index < Cov.cols(); ++index)
-          //{
-          //	if (_isnan(Cov(0,index)))
-          //		Cov(0,index) = 0;
-          //}
-          maxcorr = Cov.block(0,1,1,Cov.cols() - 1).maxCoeff(&r, &c); // Find the maximum value and row and column index of it
-
-          if (maxcorr > correlation_threshold){
-            VectorXd match_can = match_candidates.middleCols(c, 1);
-            if (sqrt((double)((match_can(0)-352) * (match_can(0)-352) + (match_can(1)-255) * (match_can(1)-255))) < 350 -10)
-            (*measurements).middleRows(i, 1) = match_candidates.middleCols(c, 1).transpose(); // Fill in the matched feature points
-          }
-        }
-      }
-    }
-  }
-  for (int index = 0; index <  (*measurements).rows(); ++index)
-  {
-    if ((*measurements)(index,0) != -1)
-      num_matched ++;
-  }
-
-  MatrixXd measurements_update(num_matched, 2), predicted_measurements_update(num_matched, 2);
-  (*matched_index).resize(num_matched); // Stores the matched features indices
-  int count = 0;
-  for (int index = 0; index <  (*measurements).rows(); ++index)
-  {
-    if ((*measurements)(index,0) != -1)
-    {
-      measurements_update(count,0) = (*measurements)(index,0);
-      measurements_update(count,1) = (*measurements)(index,1);
-      predicted_measurements_update(count,0) = predicted_measurements(index,0);
-      predicted_measurements_update(count,1) = predicted_measurements(index,1);
-      (*matched_index)(count) = index;
-      count ++;
-    }
-  }
-  MatrixXd measurements_update_transpose = measurements_update.transpose();
-  MatrixXd predicted_measurements_update_transpose = predicted_measurements_update.transpose();
-  Map<VectorXd> measurements_map_(measurements_update_transpose.data(), num_matched * 2);
+          			if (maxcorr > correlation_threshold)
+				{
+            				VectorXd match_can = match_candidates.middleCols(c, 1);
+            				if (sqrt((double)((match_can(0)-352) * (match_can(0)-352) + (match_can(1)-255) * (match_can(1)-255))) < 350 -10)
+					{
+            					(*measurements).middleRows(i, 1) = match_candidates.middleCols(c, 1).transpose(); // Fill in the matched feature points
+					}
+          			}
+        			}
+      			}
+    		}
+  	}
+  	//std::cout<<"Matching ok19"<<endl;
+  	for (int index = 0; index <  (*measurements).rows(); ++index)
+  	{
+    		if ((*measurements)(index,0) != -1)
+      		num_matched ++;
+  	}
+  	//std::cout<<"Matching ok9"<<endl;
+  	MatrixXd measurements_update(num_matched, 2), predicted_measurements_update(num_matched, 2);
+  	(*matched_index).resize(num_matched); // Stores the matched features indices
+  	int count = 0;
+  	for (int index = 0; index <  (*measurements).rows(); ++index)
+  	{
+    		//std::cout<<"Matching ok10"<<endl;
+    		if ((*measurements)(index,0) != -1)
+    		{
+      			measurements_update(count,0) = (*measurements)(index,0);
+      			measurements_update(count,1) = (*measurements)(index,1);
+      			predicted_measurements_update(count,0) = predicted_measurements(index,0);
+      			predicted_measurements_update(count,1) = predicted_measurements(index,1);
+      			(*matched_index)(count) = index;
+      			count ++;
+    		}
+  	}
+  	MatrixXd measurements_update_transpose = measurements_update.transpose();
+  	MatrixXd predicted_measurements_update_transpose = predicted_measurements_update.transpose();
+  	Map<VectorXd> measurements_map_(measurements_update_transpose.data(), num_matched * 2);
 	Map<VectorXd> predicted_measurements_map_(predicted_measurements_update_transpose.data(), num_matched * 2);
 	*measurements_map = measurements_map_;
 	*predicted_measurements_map = predicted_measurements_map_;

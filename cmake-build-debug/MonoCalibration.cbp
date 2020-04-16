@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="MonoCalibration"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\usr\;CMake Files\..\..\..\..\usr\local\;CMake Files\..\..\..\..\usr\local\lib\;CMake Files\..\..\..\..\usr\local\lib\cmake\;CMake Files\..\..\..\..\usr\local\lib\cmake\opencv4\;CMake Files\..\..\..\..\usr\lib\;CMake Files\..\..\..\..\usr\lib\cmake\;CMake Files\..\..\..\..\usr\lib\cmake\eigen3\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/strip">
+				<Option working_dir="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 install/strip"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="MonoCalibration">
+				<Option output="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/MonoCalibration" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1"/>
+					<Add directory="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/../shared/boost_1_65.1/boost"/>
+					<Add directory="/usr/local/include/opencv4"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 MonoCalibration"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="MonoCalibration/fast">
+				<Option output="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/MonoCalibration" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1"/>
+					<Add directory="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/../shared/boost_1_65.1/boost"/>
+					<Add directory="/usr/local/include/opencv4"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 MonoCalibration/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install">
+				<Option working_dir="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 install"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="list_install_components">
+				<Option working_dir="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 list_install_components"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/local">
+				<Option working_dir="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 install/local"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include/Camera.h">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include/DataAssociator.h">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include/FilterBank.h">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include/Kalman.h">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include/KalmanFilter.h">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include/MapManagementFilterBank.h">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include/MathUtil.h">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include/Monoslam.h">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include/MotionModel.h">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include/filegrabber.h">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include/framegrabber.h">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include/targetver.h">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/include/vars.h">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/src/Camera.cpp">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/src/DataAssociator.cpp">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/src/FilterBank.cpp">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/src/Kalman.cpp">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/src/KalmanFilter.cpp">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/src/MapManagementFilterBank.cpp">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/src/MathUtil.cpp">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/src/Mono_Exp.cpp">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/src/Monoslam.cpp">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/src/MotionModel.cpp">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/src/filegrabber.cpp">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/src/framegrabber.cpp">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/src/vars.cpp">
+			<Option target="MonoCalibration"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/../../../../usr/local/lib/cmake/opencv4/OpenCVConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\local\lib\cmake\opencv4\"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/../../../../usr/local/lib/cmake/opencv4/OpenCVConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\local\lib\cmake\opencv4\"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/../../../../usr/local/lib/cmake/opencv4/OpenCVModules-release.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\local\lib\cmake\opencv4\"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/../../../../usr/local/lib/cmake/opencv4/OpenCVModules.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\local\lib\cmake\opencv4\"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/../../../../usr/lib/cmake/eigen3/Eigen3Config.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\cmake\eigen3\"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/../../../../usr/lib/cmake/eigen3/Eigen3ConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\cmake\eigen3\"/>
+		</Unit>
+		<Unit filename="/home/haiyutan/master-thesis/MonoSLAMAutoCalibrationV1/../../../../usr/lib/cmake/eigen3/Eigen3Targets.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\cmake\eigen3\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

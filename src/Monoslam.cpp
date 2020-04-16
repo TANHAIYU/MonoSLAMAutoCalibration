@@ -1,11 +1,15 @@
-//#include "Monoslam.h"
-// Important! without it the MapManagement can not be recognized, while there is no MapManagement header file included in the Monoslam.h
+#include "Monoslam.h"
 #include "MapManagementFilterBank.h"
 #include "Kalman.h"
 #include "MotionModel.h"
+#include <stdio.h>
 #include "DataAssociator.h"
-#include <time.h>  
+#include <time.h>
+
+
 #define fopen_s(fp, fmt, mode)    *(fp)=fopen( (fmt), (mode))
+
+
 typedef unsigned long long _ULonglong;
 
 namespace cv
@@ -55,10 +59,7 @@ void MonoSLAM::Init(const string &config_path, double* dx, double* dy,
 	KalmanFilterBank_ = new FilterBank();
 	Cam = new Camera();
 
-	//frame_grabber_ = new FrameGrabber(); // Commented out to release mode
 	ParseVarsFile(config_path, dx, dy, nRows, nCols, model, &input_mode, input_name);
-	// get frame range from init_frame_id to init_max
-	//frame_grabber_->Init(input_name, input_mode, init_frame_id, init_max); // Commented out to release mode 
 	MapManager = new MapManagement();
 	Kalman_ = new Kalman();
 	MotionModel_ = new MotionModel();
@@ -71,7 +72,7 @@ void MonoSLAM::Init_filterbank(FilterBank *KalmanFilterBank_)
 	x_k_k_output = KalmanFilterBank_->x_k_k;
 	p_k_k_output = KalmanFilterBank_->p_k_k;
 	KalmanFilterBank_->initialize_filterbank();
-	mu = VectorXd::Ones(KalmanFilterBank_->filter_size) / KalmanFilterBank_->filter_size;
+	mu = VectorXd::Ones(KalmanFilterBank_->filter_size) / KalmanFilterBank_->filter_size;  //TODO::BY haiyu
 }
 
 void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_last, Frame frame_next)
@@ -83,32 +84,30 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
   double start1 = clock();
 	MapManager->map_management_filter_bank(step, frame_last, this);
   double end1 = clock();
-  // If there is no feature in the map after processing the image, jump out
+  // If there is no feature in the map after processing the image, jump out 需要保证处理的图片中要有特征点，不然直接跳出
   if (this->features_info.size() == 0)
   {
     return;
   }
-	//for (size_t i = 0; i < features_info.size(); ++i)
-	//{
-	//	cout << features_info.at(i).uv_when_initialized <<endl;
-	//}
-	//frame_grabber_->GetFrame(step + 1, &frame_last);
 
   double start2 = clock();
+  //用EKF预测
   Kalman_->EKF_Prediction(this);
   double end2 = clock();
   double start3 = clock();
-	DataAssociator_->FilterBankMatching(this, this->mu, frame_next);
+  DataAssociator_->FilterBankMatching(this, this->mu, frame_next);
   double end3 = clock();
   double start4 = clock();
-	Kalman_->EKF_Update(this->KalmanFilterBank_->FilterBank_);
+  Kalman_->EKF_Update(this,this->KalmanFilterBank_->FilterBank_);
   double end4 = clock();
 
 
   cout << double((end1-start1)) / CLOCKS_PER_SEC << "    " << double((end2-start2)) / CLOCKS_PER_SEC << "    " 
     << double((end3-start3)) / CLOCKS_PER_SEC << "    "  << double((end4-start4)) / CLOCKS_PER_SEC << "    " << endl;
 	// Compute a posteriori probability for each filter
-	num_filters = this->KalmanFilterBank_->filter_size ;
+	// num_filters = this->KalmanFilterBank_->filter_size ;
+	num_filters = this->KalmanFilterBank_->filter_size/2 ; //TODO::BY haiyu
+	//cout<<"filter_size after monoslamok5: "<<num_filters<<endl;  //TODO::BY haiyu
 	mu_data = VectorXd::Zero(num_filters);
 
 	for (size_t i = 0; i < num_filters; ++i)
@@ -127,17 +126,17 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
   mu_data = mu_data / normalization_coefficient_data;
   mu = mu / normalization_coefficient;
 
-	// Final output of state vector and covariance matrix
+	// Final output of state vector and covariance matrix  最终的状态矩阵与协防差矩阵
 	this->x_k_k_output = VectorXd::Zero(this->KalmanFilterBank_->FilterBank_.at(0)->x_k_k_.size());
 	this->p_k_k_output = MatrixXd::Zero(this->KalmanFilterBank_->FilterBank_.at(0)->p_k_k_.rows(), this->KalmanFilterBank_->FilterBank_.at(0)->p_k_k_.cols());
 
-	// State vector computation
+	// State vector computation 计算状态向量
 	for (size_t i = 0; i < num_filters; ++i)
 	{
 		this->x_k_k_output += this->KalmanFilterBank_->FilterBank_.at(i)->x_k_k_ * this->mu(i);
 	}
 
-	// Covariance matrix compuatation
+	// Covariance matrix compuatation 计算协方差矩阵
 	for (size_t i = 0; i < num_filters; ++i)
 	{
 		this->p_k_k_output += (this->KalmanFilterBank_->FilterBank_.at(i)->p_k_k_ + 
@@ -145,14 +144,13 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
 			((this->x_k_k_output - this->KalmanFilterBank_->FilterBank_.at(i)->x_k_k_).transpose())) * this->mu(i);
 	}
 
-
-	// Do hypothesis test to see which filters are to be pruned
+	// Do hypothesis test to see which filters are to be pruned 检测假说来看哪些filter被删减
 
 	if (num_filters > 1)
 	{
 		VectorXi filters_to_prune;
 		filters_to_prune = VectorXi::Zero(num_filters);
-		for (size_t i = 0; i < num_filters; ++i)
+		for (size_t i = 0; i < num_filters; ++i)  
 		{
 			this->likelihood_ratio(i) = this->likelihood_ratio(i) + log10(mu_data(i) / ((mu_data.sum() - mu_data(i)) / (num_filters - 1)));
 			if (this->likelihood_ratio(i) < B)
@@ -183,15 +181,15 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
 		// Assign new mu and likelihood ratio
     this->mu = mu_new;
     this->likelihood_ratio = likelihood_ratio_new;
-    this->KalmanFilterBank_->filter_size = num_filters_new;
+    this->KalmanFilterBank_->filter_size = num_filters_new*2 ;   //*2 TODO:By haiyu
+    cout<<"after pruned filter size: "<<num_filters_new<<endl;
 
-    // Renormalize probabilities
+    // Renormalize probabilities 重新归一化概率
     double sum_of_discrete_probabilities = this->mu.sum();
     this->mu /= sum_of_discrete_probabilities;
-
   }
-  
-  // Display the matched and unmatched feature points
+    cout<<"renormalize probabilities done!!!"<<endl;
+  // Display the matched and unmatched feature points 展示配对和未配对的特征点
   cv::Mat ImPre, ImNPre, Imfinal;
   cv::KeyPoint feature_P, feature_NP, feature_Meas;
   vector<cv::KeyPoint> P_pre, P_npre, P_Meas;
@@ -233,7 +231,7 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
       Uncer.color = cv::Scalar(255, 0, 255);
       MatrixXd Ellpoint;
       double chi2 = 9.2103;
-      GetEllPoints(this->S_predicted_.block(2 * index, 2 * index, 2, 2), 
+      GetEllPoints(this->S_predicted_.block(2 * index, 2 * index, 2, 2),
         predicted_measurements.row(index), chi2, &(Uncer.EllPoints));
       Predicted.push_back(Uncer);
     }
@@ -251,7 +249,7 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
       Uncer.color = cv::Scalar(255, 255, 0);
       MatrixXd Ellpoint;
       double chi2 = 9.2103;
-      GetEllPoints(this->S_predicted_.block(2 * index, 2 * index, 2, 2), 
+      GetEllPoints(this->S_predicted_.block(2 * index, 2 * index, 2, 2),
         predicted_measurements.row(index), chi2, &(Uncer.EllPoints));
       Unpredicted.push_back(Uncer);
     }
@@ -290,6 +288,9 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
         cv::drawKeypoints(frame_color, P_Meas, ImPre, cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DEFAULT);
         cv::drawKeypoints(ImPre, P_pre, ImNPre, cv::Scalar(0, 255, 0), cv::DrawMatchesFlags::DEFAULT);
         cv::drawKeypoints(ImNPre, P_npre, Imfinal, cv::Scalar(255, 0, 0), cv::DrawMatchesFlags::DEFAULT);
+        cout<<"draw the keypoint on the image done!!!"<<endl;
+
+
         for (auto it = ind_feats.begin(), itEnd = ind_feats.end(); it != itEnd; it ++)
         {
           if (!(*it).predicted)
@@ -299,18 +300,18 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
           cv::putText(Imfinal, (*it).num, (*it).position, fontFace, fontScale,
           CV_RGB(250,0,0), thickness, 8);
         }
-        //char imname1[200], imname2[200];
-        //sprintf(imname1, "%d__1", step);
-        //sprintf(imname2, "%d__2", step);
+        char imname1[200], imname2[200];
+        sprintf(imname1, "%d__1", step);
+        sprintf(imname2, "%d__2", step);
         //imshow(imname1, ImPre);
         //imshow(imname2, ImNPre);
-        // Draw endoscopic circle on the image
+        //Draw endoscopic circle on the image
         int radius = 350; // 330
         cv::Point_<int> center(352, 255); // 360, 288
         const cv::Scalar color(255, 255, 255);
         cv::circle(Imfinal, center, radius, color, 1, 8, 0);
         cv::imshow("image 1", Imfinal);
-        
+
         // Plot error coordinates
         double std_f = std::sqrt(this->p_k_k_output(0,0));
 
@@ -326,74 +327,11 @@ void MonoSLAM::GoOneStep(int step, int init_frame_id, int init_max, Frame frame_
         FILE *ProjectionError;
         char *errorname = new char[50];
         sprintf(errorname, "errors/error%04d.txt", step);
-        fopen_s(&ProjectionError, errorname, "a");
-        for (int ind = 0; ind < this->error_coordinates.rows(); ind++)
-        {
-          if (this->error_coordinates(ind, 0) != -1 && this->error_coordinates(ind, 1) != -1 && this->measurements(ind, 0) != -1 && measurements(ind, 1) != -1)
-          {
-            fprintf(ProjectionError, "%lf    %lf\n", this->error_coordinates(ind, 0) + 100, this->error_coordinates(ind, 1) + 100);
-            errorP.pt.x = this->error_coordinates(ind, 0) + 100;
-            errorP.pt.y = this->error_coordinates(ind, 1) + 100;
-            errorP.size = 2;
-            if (errorP.pt.x > 0 && errorP.pt.x < 200 & errorP.pt.y > 0 && errorP.pt.y < 200)
-              error.push_back(errorP);
-          }
-        }
-        fclose(ProjectionError);
-        delete[] errorname;
-        //cv::drawKeypoints(Imerror, error, Imerror, cv::Scalar(0, 0, 100), 4);
-	cv::drawKeypoints(Imerror, error, Imerror, cv::Scalar(0, 0, 100), cv::DrawMatchesFlags::DEFAULT);
-        cv::imshow("error", Imerror);
+        cout << "write error into file, done !!!"<<endl;
+
         static char s[30];
-        sprintf(s, "error/error%d.jpg", step);
-        //cv::imwrite(s, Imerror);
-
-
-        // Plot pre and measurement error coordinates
-        MatrixXd error_p_m;
-        error_p_m = -MatrixXd::Ones(this->measurements.rows(), 2);
-        for (int ind = 0; ind < this->measurements.rows(); ind++)
-        {
-          if (this->measurements(ind, 0) != -1 && measurements(ind, 1) != -1)
-          {
-            error_p_m(ind, 0) = this->predicted_measurements(ind, 0) - this->measurements(ind, 0);
-            error_p_m(ind, 1) = this->predicted_measurements(ind, 1) - this->measurements(ind, 1);
-          }
-        }
-
-        static cv::vector<cv::KeyPoint> errvec_p_m;
-        errvec_p_m.clear();
-        static cv::KeyPoint errorP_p_m;
-        static cv::Mat Imerror_p_m(200,200,CV_8UC1);
-        Imerror_p_m.setTo(cv::Scalar(255, 255, 255));
-        errorP_p_m.pt.x = 100;
-        errorP_p_m.pt.y = 100;
-        errorP_p_m.size = 10;
-        errvec_p_m.push_back(errorP_p_m);
-        for (int ind = 0; ind < error_p_m.rows(); ind++)
-        {
-          if (error_p_m(ind,0) != -1)
-          {
-          errorP_p_m.pt.x = error_p_m(ind, 0) + 100;
-          errorP_p_m.pt.y = error_p_m(ind, 1) + 100;
-          errorP_p_m.size = 2;
-          if (errorP_p_m.pt.x > 0 && errorP_p_m.pt.x < 200 & errorP_p_m.pt.y > 0 && errorP_p_m.pt.y < 200)
-           errvec_p_m.push_back(errorP_p_m);
-          }
-        }
-
-        //cv::drawKeypoints(Imerror_p_m, errvec_p_m, Imerror_p_m, cv::Scalar(0, 0, 200), 4);
-        //cv::imshow("error_p_m", Imerror_p_m);
-
-        sprintf(s, "error_p_m/error_p_m%d.jpg", step);
-        //cv::imwrite(s, Imerror_p_m);
-
-
-        //static char s[50];
         sprintf(s, "imwrite/step%d.jpg", step);
         cv::imwrite(s, Imfinal);
-        cv::waitKey(1);
-
 
 
 }

@@ -1,6 +1,7 @@
 #include "vars.h"
 #include<iostream>
 #include<fstream>
+#include <string>
 #include<sstream>
 
 inline std::string Trim(const std::string& str, const std::string& delimiters = " \f\n\r\t\v" )
@@ -11,11 +12,11 @@ inline std::string Trim(const std::string& str, const std::string& delimiters = 
                 str.substr( f, str.find_last_not_of( delimiters ) + 1 );
 }
 
-void ParseVarsFile(const string& filename, double* dx, double* dy,
-	                int* nRows, int* nCols, string* model, bool* input_mode, string& input_name)
-{
-	ifstream f(filename.c_str());
-    
+void ParseVarsFile(const string& filename, double* dx,
+                    double* dy, int* nRows,int* nCols,
+	                string* model, bool* input_mode, string& input_name){
+    ifstream f(filename.c_str());
+
     if( f.is_open() )
     {
         while( !f.bad() && !f.eof())

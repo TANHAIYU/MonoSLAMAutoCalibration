@@ -1,4 +1,5 @@
 #include "Kalman.h"
+#include <vector>
 
 Kalman::Kalman()
 {
@@ -126,7 +127,7 @@ bool Kalman::hi_inverse_depth(VectorXd *zi, VectorXd yi6d, VectorXd t_wc, Matrix
 
 }
 
-// Camera reprojection using the calibration parameter got from the scopis calibration method
+// Camera reprojection using the calibration parameter got from the scopis calibration method 使用最近的标定参数进行可视化重投影误差来进行判断参数的好坏
 bool Kalman::hi_cartesian_scopis(VectorXd *zi, VectorXd yi3d, VectorXd t_wc, MatrixXd r_wc, Camera *cam, 
 	vector<MonoSLAM::feature_info> features_info, VectorXd cali_para)
 {
@@ -847,11 +848,19 @@ void Kalman::EKF_Prediction(MonoSLAM *mono_slam)
 	vector<KalmanFilter *> &FilterBank = mono_slam->KalmanFilterBank_->FilterBank_;
 	// Calculation for each filter in the filterbank
 	//#pragma omp parallel for
-	for (FilterBank_iter = FilterBank.begin(); FilterBank_iter != FilterBank.end(); ++FilterBank_iter)
+	//for (FilterBank_iter = FilterBank.begin(); FilterBank_iter != FilterBank.end(); ++FilterBank_iter) //ORIGINAL:: TODO BY haiyu
+	cout << "FilterBank_iter size in EKF_Prediction: "<<FilterBank.size()<<endl;                                           //BY haiyu
+	cout << "filter_size in EKF_Prediction: "<< mono_slam->KalmanFilterBank_->filter_size/2<< endl;                       //BY haiyu
+	//for (FilterBank_iter = FilterBank.begin(); FilterBank_iter != FilterBank.begin()+FilterBank.size()/2; ++FilterBank_iter) //TODO:: By haiyu
+	for (FilterBank_iter = FilterBank.begin(); FilterBank_iter != FilterBank.begin()+ mono_slam->KalmanFilterBank_->filter_size/2 ; ++FilterBank_iter) //TODO:: By haiyu
 	{
+		//cout<<"p_k_km1_ size at 0st position:"<<(*FilterBank_iter)->p_k_km1_.rows()<<" "<<(*FilterBank_iter)->p_k_km1_.cols()<<endl;  //hier::p_k_km1_'s size is 168*168 by haiyu
+		//cout<<"p_k_k_ size at 0st position:"<<(*FilterBank_iter)->p_k_k_.rows()<<" "<<(*FilterBank_iter)->p_k_k_.cols()<<endl; //By haiyu 318×318
 		mono_slam->MotionModel_->predict_state_and_covariance((*FilterBank_iter)->x_k_k_, (*FilterBank_iter)->p_k_k_, 
-			(*FilterBank_iter)->type, (*FilterBank_iter)->std_a_, (*FilterBank_iter)->std_alpha_, &(*FilterBank_iter)->x_k_km1_, &(*FilterBank_iter)->p_k_km1_);
-
+			(*FilterBank_iter)->type, (*FilterBank_iter)->std_a_, (*FilterBank_iter)->std_alpha_, &(*FilterBank_iter)->x_k_km1_, &(*FilterBank_iter)->p_k_km1_);  //TODO:: this line code has big problem! try fix it.
+		
+		//cout<<"p_k_km1_ size at 1st position:"<<(*FilterBank_iter)->p_k_km1_.rows()<<" "<<(*FilterBank_iter)->p_k_km1_.cols()<<endl;  //hier::p_k_km1_'s size is 318*318
+		//cout<<"p_k_k_ size at 1st position:"<<(*FilterBank_iter)->p_k_k_.rows()<<" "<<(*FilterBank_iter)->p_k_k_.cols()<<endl;   //By haiyu
 		//(*FilterBank_iter)->predicted_measurements = predict_camera_measurements((*FilterBank_iter)->x_k_km1_, *FilterBank_iter, mono_slam);
 		predict_camera_measurements((*FilterBank_iter)->x_k_km1_, *FilterBank_iter, mono_slam, &(*FilterBank_iter)->predicted_measurements);
 
@@ -869,14 +878,22 @@ void Kalman::EKF_Prediction(MonoSLAM *mono_slam)
 
 }
 
-void Kalman::EKF_Update(vector<KalmanFilter *> FilterBank)
+void Kalman::EKF_Update(MonoSLAM *mono_slam, vector<KalmanFilter *> FilterBank)
 {
 	vector<KalmanFilter *>::iterator FilterBank_iter;
 	//#pragma omp parallel for
-	for (FilterBank_iter = FilterBank.begin(); FilterBank_iter != FilterBank.end(); ++FilterBank_iter)
-	{
+	//for (FilterBank_iter = FilterBank.begin(); FilterBank_iter != FilterBank.end(); ++FilterBank_iter)  //Original::BY haiyu
+	//for (FilterBank_iter = FilterBank.begin(); FilterBank_iter != FilterBank.begin()+FilterBank.size()/2; ++FilterBank_iter)//TODO::BY haiyu
+	for (FilterBank_iter = FilterBank.begin(); FilterBank_iter != FilterBank.begin()+ mono_slam->KalmanFilterBank_->filter_size/2 ; ++FilterBank_iter) //TODO:: By haiyu
+	{	
+		//cout<<"EKF_UPDATE1"<<endl;
+		//cout<< "p_k_km1_ at 2st position: "<<(*FilterBank_iter)->p_k_km1_<<endl;
+		//cout<<"p_k_km1_ size at 2st position:"<<(*FilterBank_iter)->p_k_km1_.rows()<<" "<<(*FilterBank_iter)->p_k_km1_.cols()<<endl;
 		Update((*FilterBank_iter)->x_k_km1_, (*FilterBank_iter)->p_k_km1_, (*FilterBank_iter)->H_matching_, 
 			(*FilterBank_iter)->R_matching_, (*FilterBank_iter)->z_, (*FilterBank_iter)->h_, &(*FilterBank_iter)->x_k_k_, &(*FilterBank_iter)->p_k_k_);
+		//cout<< "p_k_km1_ at 3st position: "<<(*FilterBank_iter)->p_k_km1_<<endl;
+    //cout<<"p_k_km1_ size at 3st position:"<<(*FilterBank_iter)->p_k_km1_.rows()<<" "<<(*FilterBank_iter)->p_k_km1_.cols()<<endl;
+		//cout<<"EKF_UPDATE2"<<endl;
 	}
 
 }
@@ -889,13 +906,25 @@ void Kalman::Update(VectorXd x_km1_k, MatrixXd p_km1_k, MatrixXd H, MatrixXd R, 
 	// Kalman filter gain
 	MatrixXd S, Jnorm;
 	size_t size_p_k_k;
+
+        //cout<<"H size in update:"<<H.rows()<<" "<<H.cols()<<endl;
+
+        //cout<<"p_km1_k size in update:"<<p_km1_k.rows()<<" "<<p_km1_k.cols()<<endl;
+
+        //cout<<"R size in update:"<<R.rows()<<" "<<R.cols()<<endl;
+
+	//cout <<"p_k_k size in update: "<< (*p_k_k).rows()<<" "<<(*p_k_k).cols()<<endl;
+
+	//cout<<"EKF_UPDATE2.1"<<endl;
 	S = H * p_km1_k * H.transpose() + R;
+	//cout<<"EKF_UPDATE2.2"<<endl;
 	K = p_km1_k * H.transpose() * S.inverse();
+	//cout<<"EKF_UPDATE3"<<endl;
 
 	// State vector and covariance matrix update
 	*x_k_k = x_km1_k + K * (z - h);
 	*p_k_k = (MatrixXd::Identity(p_km1_k.rows(), p_km1_k.rows()) - K * H) * p_km1_k;
-
+	//cout<<"EKF_UPDATE4"<<endl;
 	// Normalize quaternion
 	Jnorm = NormJac((*x_k_k).segment(8, 4));
 	size_p_k_k = (*p_k_k).rows();
@@ -916,7 +945,8 @@ void Kalman::Update(VectorXd x_km1_k, MatrixXd p_km1_k, MatrixXd H, MatrixXd R, 
 		*p_k_k = p_km1_k;
 		//K << 0;
 	}
-
+	//cout<<"EKF_UPDATE5"<<endl;
+	//cout <<"p_k_k size after updated:  "<< (*p_k_k).rows()<<" "<< (*p_k_k).cols()<<endl;
 }
 
 MatrixXd Kalman::NormJac(VectorXd q)

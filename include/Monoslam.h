@@ -45,7 +45,7 @@ public:
 		int times_predicted;
 		int times_measured;
 		int init_frame;
-    int ind_feat;
+    		int ind_feat;
 		VectorXd init_measurement;
 		string type;
 		VectorXd yi;

@@ -6,10 +6,7 @@
 FilterBank::FilterBank():f_start(100), f_end(610), k1_start(0.02), k1_end(0.06),
 	k2_start(0.003), k2_end(0.015), standard_deviation_z(1.0), std_a(0.005), std_alpha(0.005),
 	f_deviation(30), k1_deviation(0.04), k2_deviation(0.006), Cx_0(160), Cy_0(120), type("constant_velocity")
-  // Defaut
-  //f_start(100), f_end(610), k1_start(0.02), k1_end(0.06),
-	//k2_start(0.003), k2_end(0.015), standard_deviation_z(1.0), std_a(0.005), std_alpha(0.005),
-	//f_deviation(30), k1_deviation(0.04), k2_deviation(0.006), Cx_0(160), Cy_0(120), type("constant_velocity")
+
 {
 	x_k_k.resize(18);
 	p_k_k.resize(18,18);
@@ -27,14 +24,7 @@ FilterBank::~FilterBank()
 void FilterBank::initialize_x_and_p()
 {
 	// Initial velocity and calibration parameters values
-  // Defaut:
-  //double v_0 = 0; double std_v_0 = 0; double w_0 = 1e-15; double std_w_0 = 0;
-	//double f_0 = 210; double std_f_0 = 7.5; double Cx_0 = 160; double std_Cx_0 = 3.3;
-	//double Cy_0 = 120; double std_Cy_0 = 3.3; double k1_0 = 0.069; double std_k1_0 = 0.01;
-	//double k2_0 = 0.011; double std_k2_0 = 0.0015;
-
 	double v_0 = eps; double std_v_0 = 0; double w_0 = 1e-15; double std_w_0 = 0;
-  //                                            1e-15
 	double f_0 = 210; double std_f_0 = 7.5; double Cx_0 = 360; double std_Cx_0 = 3.3;
 	double Cy_0 = 290; double std_Cy_0 = 3.3; double k1_0 = 0.069; double std_k1_0 = 0.01;
 	double k2_0 = 0.011; double std_k2_0 = 0.0015;
@@ -82,7 +72,6 @@ void FilterBank::initialize_filterbank()
 		}
 	}
 	filter_size = FilterBank_.size();
-
 }
 
 

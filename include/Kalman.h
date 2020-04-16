@@ -13,7 +13,7 @@ public:
 	// Structure of the software needs to be reorgnized afterwards for optimization. One idea is to make a predict camera measurements class and 
 	// this class should not include Monoslam.h file and should not have MonoSLAM type input argument, use the class in Kalman and MapManagementFilterBank file 
 	// in the end.
-    // ------------------------------------------------------------------------------------------------------------
+        // ------------------------------------------------------------------------------------------------------------
     void predict_camera_measurements(VectorXd x_k_k, KalmanFilter *kalmanfilter, MonoSLAM *mono_slam, Matrix <double, Dynamic, 2> *predicted_measurements);
 	bool hi_cartesian(VectorXd *zi, VectorXd yi3d, VectorXd t_wc, MatrixXd r_wc, Camera *cam, 
 						vector<MonoSLAM::feature_info> features_info, VectorXd cali_para);
@@ -26,7 +26,7 @@ public:
 	VectorXd hu(VectorXd yi, Camera *cam, VectorXd cali_para);
 	// Project the undistorted image coordinates to the distorted ones
 	Vector2d distort_fm(VectorXd uv, Camera *cam, VectorXd cali_para);
-    // ------------------------------------------------------------------------------------------------------------
+        // ------------------------------------------------------------------------------------------------------------
 
 
 	void CalculateDerivatives(VectorXd x_k_km1, MatrixXd PredictedMeasurements, Camera *cam, vector<MonoSLAM::feature_info> features_info, MatrixXd *H_predicted);
@@ -87,7 +87,7 @@ public:
 
 	// Extended kalman filter prediction step
 	void EKF_Prediction(MonoSLAM *mono_slam);
-	void EKF_Update(vector<KalmanFilter *> FilterBank);
+	void EKF_Update(MonoSLAM *mono_slam, vector<KalmanFilter *> FilterBank);
 	void Update(VectorXd x_km1_k, MatrixXd p_km1_k, MatrixXd H, MatrixXd R, VectorXd z, VectorXd h, VectorXd *x_k_k, MatrixXd *p_k_k);
 	MatrixXd NormJac(VectorXd q);
 

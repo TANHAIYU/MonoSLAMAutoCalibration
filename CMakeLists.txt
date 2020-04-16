@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 SET(PROJECTNAME MonoCalibration)
 PROJECT(${PROJECTNAME})
+SET(CMAKE_CXX_COMPILER "/usr/bin/g++")
 
 find_package(OpenCV)
+find_package(Eigen3)
 
 file(GLOB folder_source src/*.cpp)
 file(GLOB folder_header include/*.h)
@@ -11,7 +13,8 @@ SOURCE_GROUP("Source Files" FILES ${folder_source})
 SOURCE_GROUP("Header Files" FILES ${folder_header})
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include
-                    ${OpenCV_INCLUDE_DIRS})
+                    ${OpenCV_INCLUDE_DIRS}
+		    ${EIGEN3_INCLUDE_DIR})
 
 # ADD_EXECUTABLE(${PROJECTNAME} ${folder_source} ${folder_header})
 
@@ -45,7 +48,7 @@ add_executable(${PROJECTNAME} ${folder_source} ${folder_header})
 
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
-    target_link_libraries(${PROJECTNAME} PUBLIC Boost::system Boost::filesystem Boost::thread ${OpenCV_LIBRARIES})
+    target_link_libraries(${PROJECTNAME} PUBLIC Boost::system Boost::filesystem Boost::thread ${OpenCV_LIBRARIES} ${EIGEN3_LIBRARIES})
 # ${HYRISE_SQLPARSER})
 endif()
 

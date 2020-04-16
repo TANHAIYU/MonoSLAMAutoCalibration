@@ -2,6 +2,7 @@
 #define KALMANFILTER_H
 #include<string>
 #include<Eigen/Eigen>
+#include<Eigen/Core>
 
 using namespace std;
 using namespace Eigen;
@@ -13,10 +14,7 @@ public:
 	~KalmanFilter();
 	void InitFilterFields(double std_a,
 	                     double std_alpha,
-	                     double standard_deviation_z,
-						 VectorXd x_k_km1,
-						 MatrixXd p_k_km1,
-						 string type);
+	                     double standard_deviation_z, VectorXd x_k_km1, MatrixXd p_k_km1, string type);
 	string type;
 
 	// State vector and covariance matrix
